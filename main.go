@@ -3,7 +3,6 @@ package main
 import (
 	"io"
 	"os"
-	"runtime"
 
 	"github.com/natefinch/lumberjack"
 	"github.com/sirupsen/logrus"
@@ -21,12 +20,12 @@ type StratumMinerConfig struct {
 func main() {
 	var url, username, password, loglevel, logfile string
 	var threads int
-	pflag.StringVarP(&url, "url", "o", "ckb.uupool.cn:10861", "stratum pool url")
-	pflag.StringVarP(&username, "username", "u", "test.worker1", "username")
+  pflag.StringVarP(&url, "url", "o", "btcpool:1800", "stratum pool url")
+	pflag.StringVarP(&username, "username", "u", "alice", "username")
 	pflag.StringVarP(&password, "password", "x", "x", "password")
-	pflag.StringVarP(&loglevel, "loglevel", "l", "debug", "log level: info, debug, trace")
+	pflag.StringVarP(&loglevel, "loglevel", "l", "trace", "log level: info, debug, trace")
 	pflag.StringVarP(&logfile, "logfile", "f", "debug.log", "logfile path")
-	pflag.IntVarP(&threads, "threads", "t", runtime.NumCPU(), "threads")
+	pflag.IntVarP(&threads, "threads", "t", 1, "threads")
 	pflag.Parse()
 
 	logrus.SetFormatter(&logrus.TextFormatter{

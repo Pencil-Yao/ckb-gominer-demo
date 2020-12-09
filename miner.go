@@ -225,6 +225,9 @@ func (m *StratumMiner) handleMesg(line []byte, flag int) error {
 		})
 	default:
 		result := false
+    if mesg.Result == nil {
+      return fmt.Errorf("can't decode result: no result")
+    }
 		if err := json.Unmarshal(*mesg.Result, &result); err != nil {
 			return fmt.Errorf("can't decode result: %v", err)
 		}
