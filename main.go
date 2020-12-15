@@ -25,7 +25,7 @@ func main() {
 	pflag.StringVarP(&password, "password", "x", "x", "password")
 	pflag.StringVarP(&loglevel, "loglevel", "l", "trace", "log level: info, debug, trace")
 	pflag.StringVarP(&logfile, "logfile", "f", "debug.log", "logfile path")
-	pflag.IntVarP(&threads, "threads", "t", 1, "threads")
+	pflag.IntVarP(&threads, "threads", "t", 4, "threads")
 	pflag.Parse()
 
 	logrus.SetFormatter(&logrus.TextFormatter{

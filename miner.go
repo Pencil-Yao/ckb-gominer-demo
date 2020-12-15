@@ -307,7 +307,7 @@ func (m *StratumMiner) startWorker(i int) {
 		bInt := Hash2BigTarget(hash)
 		if bInt.Cmp(m.target) <= 0 {
 			logrus.Tracef("solve %x %064x", b, hash)
-			logrus.Infof("share found: %v - %064x", nonce2St, bInt)
+			// logrus.Infof("share found: %v - %064x", nonce2St, bInt)
 			go func() {
 				if err := m.request("mining.submit", []interface{}{m.cfg.Username, job.jobId, nonce2St}); err != nil {
 					logrus.Fatalf("error submit: %v", err)
