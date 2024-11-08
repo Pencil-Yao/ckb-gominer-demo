@@ -57,3 +57,10 @@ func FillZeroHashLen(hash string, l int) string {
 	}
 	return hash
 }
+
+func RevFillZeroHashLen(hash string, l int) string {
+	for len(hash) < l {
+		hash = hash + "0"
+	}
+	return hash
+}

@@ -20,7 +20,7 @@ type StratumMinerConfig struct {
 func main() {
 	var url, username, password, loglevel, logfile string
 	var threads int
-  pflag.StringVarP(&url, "url", "o", "btcpool:1800", "stratum pool url")
+	pflag.StringVarP(&url, "url", "o", "btcpool:1800", "stratum pool url")
 	pflag.StringVarP(&username, "username", "u", "alice", "username")
 	pflag.StringVarP(&password, "password", "x", "x", "password")
 	pflag.StringVarP(&loglevel, "loglevel", "l", "trace", "log level: info, debug, trace")
@@ -52,6 +52,7 @@ func main() {
 		Username: username,
 		Password: password,
 		SumIntv:  "10s",
+		Threads:  threads,
 	}
 	m := NewMiner(cfg)
 	m.Mine()

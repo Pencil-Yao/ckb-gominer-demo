@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/leifjacky/ckb-gominer-demo/eaglesong"
+	"ckb-miner/eaglesong"
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,7 +47,7 @@ type Job struct {
 func (j *Job) GetNextNonce(size int) string {
 	j.Lock()
 	defer j.Unlock()
-	n := FillZeroHashLen(j.nonce.Text(10), size*2)
+	n := FillZeroHashLen(j.nonce.Text(16), size*2)
 	j.nonce = new(big.Int).Add(j.nonce, BigOne)
 	if j.nonce.Cmp(MaxNonce) >= 0 {
 		j.nonce = new(big.Int).Sub(j.nonce, MaxNonce)
@@ -165,9 +165,9 @@ func (m *StratumMiner) handleMesg(line []byte, flag int) error {
 			if err := json.Unmarshal(*mesg.Result, &result); err != nil {
 				return fmt.Errorf("can't decode result: %v", err)
 			}
-			m.nonce2Size = int(result[2].(float64))
-			MaxNonce = new(big.Int).Lsh(new(big.Int).SetInt64(1), uint(m.nonce2Size*8))
 			m.nonce1 = result[1].(string)
+			m.nonce2Size = 16 - len(m.nonce1)/2
+			MaxNonce = new(big.Int).Lsh(new(big.Int).SetInt64(1), uint(m.nonce2Size*8))
 		} else {
 			info := []interface{}{}
 			if err := json.Unmarshal(*mesg.Error, &info); err != nil {
@@ -225,9 +225,9 @@ func (m *StratumMiner) handleMesg(line []byte, flag int) error {
 		})
 	default:
 		result := false
-    if mesg.Result == nil {
-      return fmt.Errorf("can't decode result: no result")
-    }
+		if mesg.Result == nil {
+			return fmt.Errorf("can't decode result: no result")
+		}
 		if err := json.Unmarshal(*mesg.Result, &result); err != nil {
 			return fmt.Errorf("can't decode result: %v", err)
 		}
@@ -291,28 +291,29 @@ func (m *StratumMiner) loadJob() *Job {
 }
 
 func (m *StratumMiner) startWorker(i int) {
+	var old_job *Job
 	for {
 		job := m.loadJob()
-		if job == nil {
+		if job == nil || job == old_job {
 			logrus.Warningf("#%d job not ready. sleep for 5s...", i)
 			time.Sleep(5 * time.Second)
 			continue
 		}
 		powhash := job.powHash
+
+		// compute nonce
 		nonce2 := job.GetNextNonce(m.nonce2Size)
 		nonce := m.nonce1 + nonce2
-		nonce2St := nonce2
+
 		b := append(MustStringToHexBytes(powhash), MustStringToHexBytes(nonce)...)
 		hash := eaglesong.EaglesongHash(b)
 		bInt := Hash2BigTarget(hash)
 		if bInt.Cmp(m.target) <= 0 {
-			// logrus.Tracef("solve %x %064x", b, hash)
-			// logrus.Infof("share found: %v - %064x", nonce2St, bInt)
-			go func() {
-				if err := m.request("mining.submit", []interface{}{m.cfg.Username, job.jobId, nonce2St}); err != nil {
-					logrus.Fatalf("error submit: %v", err)
-				}
-			}()
+			println(powhash, m.nonce1, nonce)
+			if err := m.request("mining.submit", []interface{}{m.cfg.Username, job.jobId, nonce2}); err != nil {
+				panic(err)
+			}
+			old_job = job
 		}
 		m.cnt++
 	}

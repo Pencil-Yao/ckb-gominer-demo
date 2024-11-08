@@ -194,6 +194,6 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
     }
 }
 
-void EaglesongHash( unsigned char * output, const unsigned char * input, int input_length ) {
+void EaglesongHash( unsigned char * output, const unsigned char * input, unsigned int input_length ) {
     EaglesongSponge(output, 32, input, input_length, 0x06);
 }
